@@ -1,9 +1,6 @@
-﻿using Application.Abstracts.Repositories;
-using Domain.Entities;
-using Microsoft.AspNetCore.Http;
+﻿using Application.Abstracts.Services;
+using Application.DTOs.PropertyAd;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence.Context;
 
 namespace API.Controllers;
 
@@ -11,55 +8,49 @@ namespace API.Controllers;
 [ApiController]
 public class PropertyAdController : ControllerBase
 {
+    private readonly IPropertyAdService _service;
 
-    private readonly IRepository<PropertyAd, int> _repository;
-    public PropertyAdController(IRepository<PropertyAd,int> repository)
+    public PropertyAdController(IPropertyAdService service)
     {
-        _repository = repository;
+        _service = service;
     }
+
     [HttpGet]
     public IActionResult GetAll()
     {
-        var propertyAds = _repository.GetAll();
+        var propertyAds = _service.GetAll();
         return Ok(propertyAds);
     }
+
     [HttpGet("{id}")]
-    public IActionResult GetById(int id) {
-        var propertyAd = _repository.GetById(id);
+    public IActionResult GetById(int id)
+    {
+        var propertyAd = _service.GetById(id);
         if (propertyAd == null)
         {
             return NotFound();
         }
         return Ok(propertyAd);
     }
+
     [HttpPost]
-    public IActionResult Create(PropertyAd propertyAd)
+    public IActionResult Create(CreatePropertyAdRequest request)
     {
-        _repository.Add(propertyAd);
-        return CreatedAtAction(nameof(GetById), new { id = propertyAd.Id }, propertyAd);
+        _service.Create(request);
+        return StatusCode(201); // Created
     }
+
     [HttpPut("{id}")]
-    public IActionResult Update(int id, PropertyAd propertyAd)
+    public IActionResult Update(int id, CreatePropertyAdRequest request)
     {
-        if (id != propertyAd.Id)
-        {
-            return BadRequest();
-        }
-        _repository.Update(propertyAd);
+        _service.Update(id, request);
         return NoContent();
     }
+
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
-        {
-        var propertyAd = _repository.GetById(id);
-        if (propertyAd == null)
-        {
-            return NotFound();
-        }
-        _repository.Delete(propertyAd);
+    {
+        _service.Delete(id);
         return NoContent();
     }
-    
-
-
 }

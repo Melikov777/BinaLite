@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Persistence.Context;
 using Application.Abstracts.Repositories;
 using Persistence.Repositories;
+using Application.Abstracts.Services;
+using Persistence.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +17,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped(typeof(IRepository<,>),
                            typeof(GenericRepository<,>));
 
+builder.Services.AddScoped<IPropertyAdRepository, PropertyAdRepository>();
+builder.Services.AddScoped<IPropertyAdService, PropertyAdService>();
+
 builder.Services.AddDbContext<BinaLiteDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 
 
