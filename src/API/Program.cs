@@ -7,11 +7,14 @@ using Persistence.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Application.Validations;
+using Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePropertyAdRequestValidator>();
+builder.Services.AddAutoMapper(typeof(PropertyAdProfile).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
