@@ -14,58 +14,7 @@ public class PropertyAdService : IPropertyAdService
         _propertyAdRepository = propertyAdRepository;
     }
 
-    public List<GetAllPropertyAdResponse> GetAll()
-    {
-        var propertyAds = _propertyAdRepository.GetAllWithMedia();
-        return propertyAds.Select(p => new GetAllPropertyAdResponse
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Description = p.Description,
-            Price = p.Price,
-            Location = p.Location,
-            RoomCount = p.RoomCount,
-            Area = p.Area,
-            IsFurnished = p.IsFurnished,
-            IsMortgage = p.IsMortgage,
-            IsExtract = p.IsExtract,
-            OfferType = p.OfferType,
-            RealEstateType = p.RealEstateType,
-            CreatedAt = p.CreatedDate
-        }).ToList();
-    }
-
-    public GetByIdPropertyAdResponse GetById(int id)
-    {
-        var propertyAd = _propertyAdRepository.GetByIdWithMedia(id);
-        if (propertyAd == null) return null;
-
-        return new GetByIdPropertyAdResponse
-        {
-            Id = propertyAd.Id,
-            Title = propertyAd.Title,
-            Description = propertyAd.Description,
-            Price = propertyAd.Price,
-            Location = propertyAd.Location,
-            RoomCount = propertyAd.RoomCount,
-            Area = propertyAd.Area,
-            IsFurnished = propertyAd.IsFurnished,
-            IsMortgage = propertyAd.IsMortgage,
-            IsExtract = propertyAd.IsExtract,
-            OfferType = propertyAd.OfferType,
-            RealEstateType = propertyAd.RealEstateType,
-            PropertyMedias = propertyAd.PropertyMedias?.Select(m => new PropertyMediaResponse
-            {
-                Id = m.Id,
-                Url = m.MediaUrl,
-                MediaType = m.MediaType
-            }).ToList(),
-            CreatedAt = propertyAd.CreatedDate,
-            UpdatedAt = propertyAd.ModifiedDate
-        };
-    }
-
-    public void Create(CreatePropertyAdRequest request)
+    public async Task CreatePropertyAdAsync(CreatePropertyAdRequest request, CancellationToken ct = default)
     {
         var propertyAd = new PropertyAd
         {
@@ -79,18 +28,47 @@ public class PropertyAdService : IPropertyAdService
             IsMortgage = request.IsMortgage,
             IsExtract = request.IsExtract,
             OfferType = request.OfferType,
-            RealEstateType = request.RealEstateType,
-            CreatedDate = DateTime.UtcNow
+            RealEstateType = request.RealEstateType
         };
 
-        _propertyAdRepository.Add(propertyAd);
-        _propertyAdRepository.SaveChanges();
+        await _propertyAdRepository.AddAsync(propertyAd, ct);
+        await _propertyAdRepository.SaveChangesAsync(ct);
     }
 
-    public void Update(int id, CreatePropertyAdRequest request)
+    public async Task<List<GetAllPropertyAdResponse>> GetAllPropertyAdsAsync(CancellationToken ct = default)
     {
-        var propertyAd = _propertyAdRepository.GetById(id);
-        if (propertyAd == null) return;
+        var propertyAds = await _propertyAdRepository.GetAllAsync(ct);
+
+        return propertyAds.Select(x => new GetAllPropertyAdResponse
+        {
+            Id = x.Id,
+            Title = x.Title,
+            Description = x.Description
+        }).ToList();
+    }
+
+    public async Task<GetByIdPropertyAdResponse> GetByIdPropertyAdAsync(int id, CancellationToken ct = default)
+    {
+        var propertyAd = await _propertyAdRepository.GetByIdAsync(id, ct);
+
+        if (propertyAd == null)
+            throw new Exception($"PropertyAd with id {id} not found");
+
+        return new GetByIdPropertyAdResponse
+        {
+            Id = propertyAd.Id,
+            Title = propertyAd.Title,
+            Description = propertyAd.Description
+
+        };
+    }
+
+    public void UpdatePropertyAd(UpdatePropertyAdRequest request)
+    {
+        var propertyAd = _propertyAdRepository.GetByIdAsync(request.Id).Result;
+
+        if (propertyAd == null)
+            throw new Exception($"PropertyAd with id {request.Id} not found");
 
         propertyAd.Title = request.Title;
         propertyAd.Description = request.Description;
@@ -103,19 +81,19 @@ public class PropertyAdService : IPropertyAdService
         propertyAd.IsExtract = request.IsExtract;
         propertyAd.OfferType = request.OfferType;
         propertyAd.RealEstateType = request.RealEstateType;
-        propertyAd.ModifiedDate = DateTime.UtcNow;
 
         _propertyAdRepository.Update(propertyAd);
-        _propertyAdRepository.SaveChanges();
+        _propertyAdRepository.SaveChangesAsync().Wait();
     }
 
-    public void Delete(int id)
+    public void DeletePropertyAd(int id)
     {
-        var propertyAd = _propertyAdRepository.GetById(id);
-        if (propertyAd == null) return;
+        var propertyAd = _propertyAdRepository.GetByIdAsync(id).Result;
+
+        if (propertyAd == null)
+            throw new Exception($"PropertyAd with id {id} not found");
 
         _propertyAdRepository.Delete(propertyAd);
-        _propertyAdRepository.SaveChanges();
+        _propertyAdRepository.SaveChangesAsync().Wait();
     }
 }
-

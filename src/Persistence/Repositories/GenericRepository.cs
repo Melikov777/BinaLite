@@ -8,39 +8,41 @@ namespace Persistence.Repositories;
 public class GenericRepository<Tentity, Tkey> : IRepository<Tentity, Tkey> where Tentity : BaseEntity<Tkey>
 {
     private readonly BinaLiteDbContext _context;
-    private readonly DbSet<Tentity> _table;
+    private readonly DbSet<Tentity> _dbSet;
+
     public GenericRepository(BinaLiteDbContext context)
     {
         _context = context;
-        _table = _context.Set<Tentity>();
-    }
-    public void Add(Tentity entity)
-    {  
-        _table.Add(entity);
+        _dbSet = context.Set<Tentity>();
     }
 
-    public void Delete(Tentity entity)
+    public async Task<List<Tentity>> GetAllAsync(CancellationToken ct = default)
     {
-        _table.Remove(entity);
+        return await _dbSet.ToListAsync(ct);
     }
 
-    public List<Tentity> GetAll()
+    public async Task<Tentity?> GetByIdAsync(Tkey id, CancellationToken ct = default)
     {
-        return _table.ToList();
+        return await _dbSet.FindAsync(new object[] { id! }, ct);
     }
 
-    public Tentity GetById(Tkey id)
+    public async Task AddAsync(Tentity entity, CancellationToken ct = default)
     {
-        return _table.Find(id);
-    }
-
-    public void SaveChanges()
-    {
-        _context.SaveChanges();
+        await _dbSet.AddAsync(entity, ct);
     }
 
     public void Update(Tentity entity)
     {
-        _table.Update(entity);
+        _dbSet.Update(entity);
+    }
+
+    public void Delete(Tentity entity)
+    {
+        _dbSet.Remove(entity);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken ct = default)
+    {
+        await _context.SaveChangesAsync(ct);
     }
 }

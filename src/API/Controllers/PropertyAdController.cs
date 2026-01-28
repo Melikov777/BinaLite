@@ -8,49 +8,45 @@ namespace API.Controllers;
 [ApiController]
 public class PropertyAdController : ControllerBase
 {
-    private readonly IPropertyAdService _service;
+    private readonly IPropertyAdService _propertyAdService;
 
-    public PropertyAdController(IPropertyAdService service)
+    public PropertyAdController(IPropertyAdService propertyAdService)
     {
-        _service = service;
+        _propertyAdService = propertyAdService;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken ct)
     {
-        var propertyAds = _service.GetAll();
-        return Ok(propertyAds);
+        var result = await _propertyAdService.GetAllPropertyAdsAsync(ct);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
-        var propertyAd = _service.GetById(id);
-        if (propertyAd == null)
-        {
-            return NotFound();
-        }
-        return Ok(propertyAd);
+        var result = await _propertyAdService.GetByIdPropertyAdAsync(id, ct);
+        return Ok(result);
     }
 
     [HttpPost]
-    public IActionResult Create(CreatePropertyAdRequest request)
+    public async Task<IActionResult> Create([FromBody] CreatePropertyAdRequest request, CancellationToken ct)
     {
-        _service.Create(request);
-        return StatusCode(201); // Created
+        await _propertyAdService.CreatePropertyAdAsync(request, ct);
+        return StatusCode(201);
     }
 
-    [HttpPut("{id}")]
-    public IActionResult Update(int id, CreatePropertyAdRequest request)
+    [HttpPut]
+    public IActionResult Update([FromBody] UpdatePropertyAdRequest request)
     {
-        _service.Update(id, request);
+        _propertyAdService.UpdatePropertyAd(request);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
     public IActionResult Delete(int id)
     {
-        _service.Delete(id);
+        _propertyAdService.DeletePropertyAd(id);
         return NoContent();
     }
 }

@@ -14,17 +14,5 @@ public class PropertyAdRepository : GenericRepository<PropertyAd, int>, IPropert
         _context = context;
     }
 
-    public List<PropertyAd> GetAllWithMedia()
-    {
-        return _context.Set<PropertyAd>()
-            .Include(x => x.PropertyMedias)
-            .ToList();
-    }
-
-    public PropertyAd GetByIdWithMedia(int id)
-    {
-        return _context.Set<PropertyAd>()
-            .Include(x => x.PropertyMedias)
-            .FirstOrDefault(x => x.Id == id);
-    }
+    
 }
