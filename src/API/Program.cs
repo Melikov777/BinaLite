@@ -25,6 +25,9 @@ builder.Services.AddScoped(typeof(IRepository<,>),
 builder.Services.AddScoped<IPropertyAdRepository, PropertyAdRepository>();
 builder.Services.AddScoped<IPropertyAdService, PropertyAdService>();
 
+builder.Services.AddScoped<ICityRepository, CityRepository>();
+builder.Services.AddScoped<ICityService, CityService>();
+
 builder.Services.AddDbContext<BinaLiteDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();

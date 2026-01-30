@@ -11,6 +11,7 @@ public class BinaLiteDbContext: DbContext
     
     public DbSet<PropertyAd> PropertyAds { get; set; } = null!;
     public DbSet<PropertyMedia> PropertyMedias { get; set; } = null!;
+    public DbSet<City> Cities { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
