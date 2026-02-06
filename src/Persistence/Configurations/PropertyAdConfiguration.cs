@@ -52,7 +52,7 @@ public class PropertyAdConfiguration : IEntityTypeConfiguration<PropertyAd>
             .IsRequired()
             .HasConversion<int>();
 
-        builder.HasMany(p => p.PropertyMedias)
+        builder.HasMany(p => p.MediaItems)
             .WithOne(pm => pm.PropertyAd)
             .HasForeignKey(pm => pm.PropertyAdId)
             .OnDelete(DeleteBehavior.Cascade);

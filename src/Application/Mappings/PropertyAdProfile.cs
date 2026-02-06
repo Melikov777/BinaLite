@@ -8,8 +8,15 @@ public class PropertyAdProfile : Profile
 {
     public PropertyAdProfile()
     {
-        CreateMap<PropertyAd, GetAllPropertyAdResponse>();
-        CreateMap<PropertyAd, GetByIdPropertyAdResponse>();
+        CreateMap<PropertyMedia, PropertyMediaItemDto>();
+
+        CreateMap<PropertyAd, GetAllPropertyAdResponse>()
+            .ForMember(dest => dest.MainImageKey, opt => opt.MapFrom(src => 
+                src.MediaItems.OrderBy(m => m.Order).Select(m => m.ObjectKey).FirstOrDefault()));
+
+        CreateMap<PropertyAd, GetByIdPropertyAdResponse>()
+            .ForMember(dest => dest.MediaItems, opt => opt.MapFrom(src => 
+                src.MediaItems.OrderBy(m => m.Order)));
 
         CreateMap<CreatePropertyAdRequest, PropertyAd>();
         CreateMap<UpdatePropertyAdRequest, PropertyAd>();

@@ -15,4 +15,5 @@ public class CreatePropertyAdRequest
     public bool IsExtract { get; set; }
     public OfferType OfferType { get; set; }
     public RealEstateType RealEstateType { get; set; }
+    public List<Microsoft.AspNetCore.Http.IFormFile>? Images { get; set; }
 }

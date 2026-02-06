@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.Context;
@@ -11,9 +12,11 @@ using Persistence.Context;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(BinaLiteDbContext))]
-    partial class BinaLiteDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260206153057_UpdatePropertyMediaObjectKey")]
+    partial class UpdatePropertyMediaObjectKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -127,6 +130,14 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MediaType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -135,11 +146,6 @@ namespace Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<int>("Order")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
                     b.Property<int>("PropertyAdId")
                         .HasColumnType("integer");
 
@@ -147,15 +153,13 @@ namespace Persistence.Migrations
 
                     b.HasIndex("PropertyAdId");
 
-                    b.HasIndex("PropertyAdId", "Order");
-
-                    b.ToTable("PropertyMedias", (string)null);
+                    b.ToTable("PropertyMedia", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PropertyMedia", b =>
                 {
                     b.HasOne("Domain.Entities.PropertyAd", "PropertyAd")
-                        .WithMany("MediaItems")
+                        .WithMany("PropertyMedias")
                         .HasForeignKey("PropertyAdId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -165,7 +169,7 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.PropertyAd", b =>
                 {
-                    b.Navigation("MediaItems");
+                    b.Navigation("PropertyMedias");
                 });
 #pragma warning restore 612, 618
         }

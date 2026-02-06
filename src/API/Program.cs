@@ -8,6 +8,10 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Application.Validations;
 using Application.Mappings;
+using API.Middlewares;
+using Minio;
+using Infrastructure.Services;
+using Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,15 +28,21 @@ builder.Services.AddScoped(typeof(IRepository<,>),
 
 builder.Services.AddScoped<IPropertyAdRepository, PropertyAdRepository>();
 builder.Services.AddScoped<IPropertyAdService, PropertyAdService>();
+builder.Services.AddScoped<IPropertyMediaRepository, PropertyMediaRepository>();
 
 builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<ICityService, CityService>();
+
+// MinIO Integration
+builder.Services.AddMinioStorage(builder.Configuration);
+
+builder.Services.AddScoped<IFileStorageService, Infrastructure.Services.S3MinioFileStorageService>();
 
 builder.Services.AddDbContext<BinaLiteDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 
-
+app.UseExceptionHandling();
 
 if (app.Environment.IsDevelopment())
 {

@@ -15,5 +15,5 @@ public class PropertyAd: BaseEntity<int>
     public bool IsExtract { get; set; }
     public OfferType OfferType { get; set; }
     public RealEstateType RealEstateType { get; set; }
-    public ICollection<PropertyMedia> PropertyMedias { get; set; }
+    public ICollection<PropertyMedia> MediaItems { get; set; }
 }

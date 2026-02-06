@@ -19,4 +19,5 @@ public class GetByIdPropertyAdResponse
     public bool IsMortgage { get; set; }
     public OfferType OfferType { get; set; }
     public RealEstateType RealEstateType { get; set; }
+    public List<PropertyMediaItemDto> MediaItems { get; set; }
 }

@@ -16,4 +16,6 @@ public class UpdatePropertyAdRequest
     public bool IsExtract { get; set; }
     public OfferType OfferType { get; set; }
     public RealEstateType RealEstateType { get; set; }
+    public List<int>? MediaIdsToDelete { get; set; }
+    public List<Microsoft.AspNetCore.Http.IFormFile>? NewImages { get; set; }
 }

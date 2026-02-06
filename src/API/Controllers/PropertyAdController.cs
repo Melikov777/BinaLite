@@ -30,23 +30,43 @@ public class PropertyAdController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreatePropertyAdRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create([FromForm] CreatePropertyAdRequest request, CancellationToken ct)
     {
         await _propertyAdService.CreatePropertyAdAsync(request, ct);
         return StatusCode(201);
     }
 
     [HttpPut]
-    public IActionResult Update([FromBody] UpdatePropertyAdRequest request)
+    public async Task<IActionResult> Update([FromForm] UpdatePropertyAdRequest request, CancellationToken ct)
     {
-        _propertyAdService.UpdatePropertyAd(request);
+        await _propertyAdService.UpdatePropertyAdAsync(request, ct);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        _propertyAdService.DeletePropertyAd(id);
+        await _propertyAdService.DeletePropertyAdAsync(id, ct);
         return NoContent();
+    }
+    [HttpPost("{id}/media")]
+    public async Task<IActionResult> UploadMedia(int id, IFormFile file, CancellationToken ct)
+    {
+        var objectKey = await _propertyAdService.UploadMediaAsync(id, file, ct);
+        return Ok(new { ObjectKey = objectKey });
+    }
+
+    [HttpDelete("media/{mediaId}")]
+    public async Task<IActionResult> DeleteMedia(int mediaId, CancellationToken ct)
+    {
+        await _propertyAdService.DeleteMediaAsync(mediaId, ct);
+        return NoContent();
+    }
+
+    [HttpGet("{id}/media")]
+    public async Task<IActionResult> GetMedia(int id, CancellationToken ct)
+    {
+        var result = await _propertyAdService.GetMediaForPropertyAdAsync(id, ct);
+        return Ok(result);
     }
 }

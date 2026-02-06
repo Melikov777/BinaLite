@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.Context;
@@ -11,9 +12,11 @@ using Persistence.Context;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(BinaLiteDbContext))]
-    partial class BinaLiteDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260206162812_RefactorPropertyMediaAndAd")]
+    partial class RefactorPropertyMediaAndAd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,9 +139,7 @@ namespace Persistence.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<int>("Order")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
                     b.Property<int>("PropertyAdId")
                         .HasColumnType("integer");
@@ -147,9 +148,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("PropertyAdId");
 
-                    b.HasIndex("PropertyAdId", "Order");
-
-                    b.ToTable("PropertyMedias", (string)null);
+                    b.ToTable("PropertyMedia", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.PropertyMedia", b =>

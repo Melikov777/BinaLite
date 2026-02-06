@@ -37,16 +37,16 @@ public class TestAController : ControllerBase
     }
 
     [HttpPut]
-    public IActionResult Update([FromBody] UpdatePropertyAdRequest request)
+    public async Task<IActionResult> Update([FromBody] UpdatePropertyAdRequest request, CancellationToken ct)
     {
-        _propertyAdService.UpdatePropertyAd(request);
+        await _propertyAdService.UpdatePropertyAdAsync(request, ct);
         return Ok();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        _propertyAdService.DeletePropertyAd(id);
+        await _propertyAdService.DeletePropertyAdAsync(id, ct);
         return Ok();
     }
 }

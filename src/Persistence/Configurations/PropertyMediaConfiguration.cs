@@ -8,19 +8,24 @@ public class PropertyMediaConfiguration : IEntityTypeConfiguration<PropertyMedia
 {
     public void Configure(EntityTypeBuilder<PropertyMedia> builder)
     {
-        builder.ToTable(nameof(PropertyMedia));
+        builder.ToTable("PropertyMedias");
 
         builder.HasKey(pm => pm.Id);
 
-        builder.Property(pm => pm.MediaUrl)
+        builder.Property(pm => pm.ObjectKey)
             .IsRequired()
             .HasMaxLength(500);
 
-        builder.Property(pm => pm.MediaType)
+        builder.Property(pm => pm.Order)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasDefaultValue(0);
 
-        builder.Property(pm => pm.PropertyAdId)
-            .IsRequired();
+        builder.HasOne(pm => pm.PropertyAd)
+            .WithMany(ad => ad.MediaItems)
+            .HasForeignKey(pm => pm.PropertyAdId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(pm => pm.PropertyAdId);
+        builder.HasIndex(pm => new { pm.PropertyAdId, pm.Order });
     }
 }
