@@ -1,11 +1,14 @@
 ﻿using Application.Abstracts.Services;
 using Application.DTOs.PropertyAd;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class TestAController : ControllerBase
 {
     private readonly IPropertyAdService _propertyAdService;
@@ -16,6 +19,7 @@ public class TestAController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
         var result = await _propertyAdService.GetAllPropertyAdsAsync(ct);
@@ -23,6 +27,7 @@ public class TestAController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id, CancellationToken ct)
     {
         var result = await _propertyAdService.GetByIdPropertyAdAsync(id, ct);
@@ -32,21 +37,24 @@ public class TestAController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePropertyAdRequest request, CancellationToken ct)
     {
-        await _propertyAdService.CreatePropertyAdAsync(request, ct);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        await _propertyAdService.CreatePropertyAdAsync(request, userId!, ct);
         return Ok();
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] UpdatePropertyAdRequest request, CancellationToken ct)
     {
-        await _propertyAdService.UpdatePropertyAdAsync(request, ct);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        await _propertyAdService.UpdatePropertyAdAsync(request, userId!, ct);
         return Ok();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
-        await _propertyAdService.DeletePropertyAdAsync(id, ct);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        await _propertyAdService.DeletePropertyAdAsync(id, userId!, ct);
         return Ok();
     }
 }

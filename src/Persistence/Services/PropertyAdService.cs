@@ -21,9 +21,10 @@ public class PropertyAdService : IPropertyAdService
         _propertyMediaRepository = propertyMediaRepository;
     }
 
-    public async Task CreatePropertyAdAsync(CreatePropertyAdRequest request, CancellationToken ct = default)
+    public async Task CreatePropertyAdAsync(CreatePropertyAdRequest request, string userId, CancellationToken ct = default)
     {
         var propertyAd = _mapper.Map<PropertyAd>(request);
+        propertyAd.UserId = userId;
 
         await _propertyAdRepository.AddAsync(propertyAd, ct);
         await _propertyAdRepository.SaveChangesAsync(ct);
@@ -64,10 +65,14 @@ public class PropertyAdService : IPropertyAdService
         return _mapper.Map<GetByIdPropertyAdResponse>(propertyAd);
     }
 
-    public async Task UpdatePropertyAdAsync(UpdatePropertyAdRequest request, CancellationToken ct = default)
+    public async Task UpdatePropertyAdAsync(UpdatePropertyAdRequest request, string userId, CancellationToken ct = default)
     {
         var propertyAd = await _propertyAdRepository.GetByIdAsync(request.Id, ct);
         if (propertyAd == null) throw new Exception($"PropertyAd with id {request.Id} not found");
+        
+        // Ownership check
+        if (propertyAd.UserId != userId)
+            throw new UnauthorizedAccessException("You can only edit your own property ads");
 
         _mapper.Map(request, propertyAd);
 
@@ -112,10 +117,14 @@ public class PropertyAdService : IPropertyAdService
         await _propertyAdRepository.SaveChangesAsync(ct);
     }
 
-    public async Task DeletePropertyAdAsync(int id, CancellationToken ct = default)
+    public async Task DeletePropertyAdAsync(int id, string userId, CancellationToken ct = default)
     {
         var propertyAd = await _propertyAdRepository.GetByIdAsync(id, ct);
         if (propertyAd == null) throw new Exception($"PropertyAd with id {id} not found");
+        
+        // Ownership check
+        if (propertyAd.UserId != userId)
+            throw new UnauthorizedAccessException("You can only delete your own property ads");
 
         // 1. Get all media and delete from MinIO
         var mediaItems = await _propertyMediaRepository.GetByPropertyAdIdAsync(id, ct);
@@ -128,6 +137,7 @@ public class PropertyAdService : IPropertyAdService
         _propertyAdRepository.Delete(propertyAd);
         await _propertyAdRepository.SaveChangesAsync(ct);
     }
+
     public async Task<string> UploadMediaAsync(int propertyAdId, Microsoft.AspNetCore.Http.IFormFile file, CancellationToken ct = default)
     {
         var propertyAd = await _propertyAdRepository.GetByIdAsync(propertyAdId, ct);
@@ -173,4 +183,3 @@ public class PropertyAdService : IPropertyAdService
         return _mapper.Map<List<Application.DTOs.PropertyMedia.PropertyMediaItemDto>>(mediaItems);
     }
 }
-

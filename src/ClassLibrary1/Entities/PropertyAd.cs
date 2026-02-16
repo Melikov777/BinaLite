@@ -16,4 +16,8 @@ public class PropertyAd: BaseEntity<int>
     public OfferType OfferType { get; set; }
     public RealEstateType RealEstateType { get; set; }
     public ICollection<PropertyMedia> MediaItems { get; set; }
+    
+    // User ownership
+    public string? UserId { get; set; }
+    public AppUser? User { get; set; }
 }
