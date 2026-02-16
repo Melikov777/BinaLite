@@ -1,4 +1,4 @@
-using Application.Abstracts.Services;
+﻿using Application.Abstracts.Services;
 using Application.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,6 +44,17 @@ public class AuthController : ControllerBase
 
         if (!result.Success)
             return Unauthorized(new { error = result.Error });
+
+        return Ok(result);
+    }
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token, CancellationToken ct)
+    {
+        var result = await _authService.ConfirmEmailAsync(userId, token, ct);
+
+        if (!result.Success)
+            return BadRequest(new { error = result.Error });
 
         return Ok(result);
     }

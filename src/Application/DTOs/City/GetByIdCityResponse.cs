@@ -1,4 +1,4 @@
-namespace Application.DTOs.City;
+﻿namespace Application.DTOs.City;
 
 public class GetByIdCityResponse
 {

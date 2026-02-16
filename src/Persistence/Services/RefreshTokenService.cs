@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Application.Abstracts.Repositories;
 using Application.Abstracts.Services;
 using Application.Options;
@@ -42,7 +42,6 @@ public class RefreshTokenService : IRefreshTokenService
         if (refreshToken == null || refreshToken.ExpiresAtUtc <= DateTime.UtcNow)
             return null;
 
-        // Consume: bir dəfə istifadə — silmək
         await _repository.DeleteByTokenAsync(token, ct);
 
         return refreshToken.User;

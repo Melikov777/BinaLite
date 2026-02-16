@@ -1,4 +1,4 @@
-namespace Application.DTOs.Auth;
+﻿namespace Application.DTOs.Auth;
 
 public class AuthResponse
 {
@@ -8,4 +8,5 @@ public class AuthResponse
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiration { get; set; }
     public string? Error { get; set; }
+    public string? Message { get; set; }
 }

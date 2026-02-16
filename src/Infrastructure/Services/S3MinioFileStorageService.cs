@@ -1,4 +1,4 @@
-using Application.Abstracts.Services;
+﻿using Application.Abstracts.Services;
 using Application.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -71,8 +71,6 @@ public class S3MinioFileStorageService : IFileStorageService
 
     public string GetFileUrl(string fileName)
     {
-        // Construct the URL manually or use PresignedGetObjectAsync if private access is needed.
-        // For public buckets: http://endpoint/bucket/filename
         var protocol = _options.UseSSL ? "https" : "http";
         return $"{protocol}://{_options.Endpoint}/{_options.Bucket}/{fileName}";
     }

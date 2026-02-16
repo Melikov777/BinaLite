@@ -70,13 +70,11 @@ public class PropertyAdService : IPropertyAdService
         var propertyAd = await _propertyAdRepository.GetByIdAsync(request.Id, ct);
         if (propertyAd == null) throw new Exception($"PropertyAd with id {request.Id} not found");
         
-        // Ownership check
         if (propertyAd.UserId != userId)
             throw new UnauthorizedAccessException("You can only edit your own property ads");
 
         _mapper.Map(request, propertyAd);
 
-        // 1. Delete requested media
         if (request.MediaIdsToDelete != null && request.MediaIdsToDelete.Any())
         {
             var allMedia = await _propertyMediaRepository.GetByPropertyAdIdAsync(propertyAd.Id, ct);
@@ -90,10 +88,8 @@ public class PropertyAdService : IPropertyAdService
             await _propertyMediaRepository.SaveChangesAsync(ct);
         }
 
-        // 2. Add new media
         if (request.NewImages != null && request.NewImages.Any())
         {
-             // Get current max order
             var currentMedia = await _propertyMediaRepository.GetByPropertyAdIdAsync(propertyAd.Id, ct);
             int nextOrder = currentMedia.Any() ? currentMedia.Max(m => m.Order) + 1 : 0;
 
@@ -122,18 +118,15 @@ public class PropertyAdService : IPropertyAdService
         var propertyAd = await _propertyAdRepository.GetByIdAsync(id, ct);
         if (propertyAd == null) throw new Exception($"PropertyAd with id {id} not found");
         
-        // Ownership check
         if (propertyAd.UserId != userId)
             throw new UnauthorizedAccessException("You can only delete your own property ads");
 
-        // 1. Get all media and delete from MinIO
         var mediaItems = await _propertyMediaRepository.GetByPropertyAdIdAsync(id, ct);
         foreach (var media in mediaItems)
         {
             await _fileStorageService.DeleteFileAsync(media.ObjectKey, ct);
         }
 
-        // 2. Delete from DB (Cascade delete will handle media records, but we explicitly cleared files)
         _propertyAdRepository.Delete(propertyAd);
         await _propertyAdRepository.SaveChangesAsync(ct);
     }

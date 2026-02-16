@@ -1,4 +1,4 @@
-using Application.DTOs.City;
+﻿using Application.DTOs.City;
 using FluentValidation;
 
 namespace Application.Validations;

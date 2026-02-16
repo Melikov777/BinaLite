@@ -21,7 +21,6 @@ public class BinaLiteDbContext : IdentityDbContext<AppUser>
         
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BinaLiteDbContext).Assembly);
         
-        // PropertyAd -> AppUser relationship
         modelBuilder.Entity<PropertyAd>()
             .HasOne(p => p.User)
             .WithMany()

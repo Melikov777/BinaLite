@@ -1,4 +1,4 @@
-using Application.Abstracts.Services;
+﻿using Application.Abstracts.Services;
 using Application.DTOs.PropertyAd;
 using AutoMapper;
 using Domain.Entities;

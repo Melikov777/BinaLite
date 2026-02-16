@@ -1,4 +1,4 @@
-namespace Application.DTOs.Common;
+﻿namespace Application.DTOs.Common;
 
 public class BaseResponse
 {

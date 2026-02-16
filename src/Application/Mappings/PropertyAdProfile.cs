@@ -1,4 +1,4 @@
-using Application.DTOs.PropertyAd;
+﻿using Application.DTOs.PropertyAd;
 using AutoMapper;
 using Domain.Entities;
 

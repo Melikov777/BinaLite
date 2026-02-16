@@ -1,4 +1,4 @@
-namespace Domain.Entities;
+﻿namespace Domain.Entities;
 
 public class RefreshToken
 {
@@ -8,6 +8,5 @@ public class RefreshToken
     public DateTime ExpiresAtUtc { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
-    // Navigation
     public AppUser User { get; set; } = null!;
 }

@@ -1,4 +1,4 @@
-namespace Application.DTOs.PropertyMedia;
+﻿namespace Application.DTOs.PropertyMedia;
 
 public class PropertyMediaItemDto
 {

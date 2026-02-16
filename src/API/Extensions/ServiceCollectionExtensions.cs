@@ -1,4 +1,4 @@
-using API.Options;
+﻿using API.Options;
 using Application.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;

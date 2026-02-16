@@ -1,4 +1,4 @@
-using Application.Options;
+﻿using Application.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

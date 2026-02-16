@@ -1,7 +1,8 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿\using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 using Application.Abstracts.Services;
 using Application.DTOs.Auth;
 using Application.Options;
@@ -16,11 +17,19 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly JwtOptions _jwtOptions;
+    private readonly IEmailService _emailService;
+    private readonly EmailOptions _emailOptions;
 
-    public AuthService(UserManager<AppUser> userManager, IOptions<JwtOptions> jwtOptions)
+    public AuthService(
+        UserManager<AppUser> userManager,
+        IOptions<JwtOptions> jwtOptions,
+        IEmailService emailService,
+        IOptions<EmailOptions> emailOptions)
     {
         _userManager = userManager;
         _jwtOptions = jwtOptions.Value;
+        _emailService = emailService;
+        _emailOptions = emailOptions.Value;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
@@ -46,7 +55,14 @@ public class AuthService : IAuthService
             return new AuthResponse { Success = false, Error = errors };
         }
 
-        return await GenerateTokenResponseAsync(user);
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = HttpUtility.UrlEncode(token);
+        var confirmUrl = $"{_emailOptions.ConfirmationBaseUrl}?userId={user.Id}&token={encodedToken}";
+
+        var htmlBody = $"<h2>Email təsdiqləməsi</h2><p>Hesabınızı təsdiqləmək üçün <a href='{confirmUrl}'>buraya klikləyin</a>.</p>";
+        await _emailService.SendAsync(user.Email!, "Email təsdiqləməsi", htmlBody, ct: ct);
+
+        return new AuthResponse { Success = true, Message = "Təsdiq emaili göndərildi. Zəhmət olmasa emailinizi yoxlayın." };
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
@@ -61,6 +77,11 @@ public class AuthService : IAuthService
         if (!isPasswordValid)
         {
             return new AuthResponse { Success = false, Error = "Invalid credentials" };
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            return new AuthResponse { Success = false, Error = "Email not confirmed" };
         }
 
         return await GenerateTokenResponseAsync(user);
@@ -85,6 +106,22 @@ public class AuthService : IAuthService
         }
 
         return await GenerateTokenResponseAsync(user);
+    }
+
+    public async Task<AuthResponse> ConfirmEmailAsync(string userId, string token, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return new AuthResponse { Success = false, Error = "User not found" };
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return new AuthResponse { Success = false, Error = errors };
+        }
+
+        return new AuthResponse { Success = true, Message = "Email uğurla təsdiqləndi." };
     }
 
     private async Task<AuthResponse> GenerateTokenResponseAsync(AppUser user)
@@ -141,7 +178,7 @@ public class AuthService : IAuthService
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = false, // expired token-i qəbul etmək üçün
+            ValidateLifetime = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = _jwtOptions.Issuer,
             ValidAudience = _jwtOptions.Audience,

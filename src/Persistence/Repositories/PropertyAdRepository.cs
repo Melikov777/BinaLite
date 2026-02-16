@@ -14,5 +14,4 @@ public class PropertyAdRepository : GenericRepository<PropertyAd, int>, IPropert
         _context = context;
     }
 
-    
 }
