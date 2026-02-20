@@ -3,6 +3,7 @@ using Application.Abstracts.Services;
 using Application.DTOs.PropertyAd;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace Persistence.Services;
 
@@ -12,13 +13,23 @@ public class PropertyAdService : IPropertyAdService
     private readonly IMapper _mapper;
     private readonly IFileStorageService _fileStorageService;
     private readonly IPropertyMediaRepository _propertyMediaRepository;
+    private readonly IEmailService _emailService;
+    private readonly UserManager<AppUser> _userManager;
 
-    public PropertyAdService(IPropertyAdRepository propertyAdRepository, IMapper mapper, IFileStorageService fileStorageService, IPropertyMediaRepository propertyMediaRepository)
+    public PropertyAdService(
+        IPropertyAdRepository propertyAdRepository,
+        IMapper mapper,
+        IFileStorageService fileStorageService,
+        IPropertyMediaRepository propertyMediaRepository,
+        IEmailService emailService,
+        UserManager<AppUser> userManager)
     {
         _propertyAdRepository = propertyAdRepository;
         _mapper = mapper;
         _fileStorageService = fileStorageService;
         _propertyMediaRepository = propertyMediaRepository;
+        _emailService = emailService;
+        _userManager = userManager;
     }
 
     public async Task CreatePropertyAdAsync(CreatePropertyAdRequest request, string userId, CancellationToken ct = default)
@@ -49,6 +60,29 @@ public class PropertyAdService : IPropertyAdService
             
             _propertyAdRepository.Update(propertyAd);
             await _propertyAdRepository.SaveChangesAsync(ct);
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user?.Email != null)
+        {
+            var adUrl = $"http://localhost:5285/api/PropertyAd/{propertyAd.Id}";
+            var htmlBody = $@"
+                <h2>Yeni elan əlavə edildi ✅</h2>
+                <p>Hörmətli <strong>{user.FullName}</strong>,</p>
+                <p>Siz aşağıdakı elanı uğurla yerləşdirdiniz:</p>
+                <table style='border-collapse:collapse;'>
+                    <tr><td style='padding:4px 12px;font-weight:bold;'>Başlıq:</td><td style='padding:4px 12px;'>{propertyAd.Title}</td></tr>
+                    <tr><td style='padding:4px 12px;font-weight:bold;'>Qiymət:</td><td style='padding:4px 12px;'>{propertyAd.Price:N0} AZN</td></tr>
+                    <tr><td style='padding:4px 12px;font-weight:bold;'>Ünvan:</td><td style='padding:4px 12px;'>{propertyAd.Location}</td></tr>
+                    <tr><td style='padding:4px 12px;font-weight:bold;'>Otaq sayı:</td><td style='padding:4px 12px;'>{propertyAd.RoomCount}</td></tr>
+                    <tr><td style='padding:4px 12px;font-weight:bold;'>Sahə:</td><td style='padding:4px 12px;'>{propertyAd.Area} m²</td></tr>
+                </table>
+                <p style='margin-top:16px;'>
+                    <a href='{adUrl}' style='display:inline-block;padding:10px 24px;background-color:#0078d4;color:#ffffff;text-decoration:none;border-radius:4px;font-weight:bold;'>Elanı göstər</a>
+                </p>
+                <p style='margin-top:16px;color:#666;'>BinaAz komandası</p>";
+
+            await _emailService.SendAsync(user.Email, "Yeni elan əlavə edildi", htmlBody, ct: ct);
         }
     }
 
